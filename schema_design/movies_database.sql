@@ -7,51 +7,51 @@ SET search_path TO "content","public";
 
 -- жанры
 CREATE TABLE IF NOT EXISTS "genre"(
-    id uuid primary key,
-    name varchar(128) not null,
-    description text,
-    created_at timestamp with time zone,
-    updated_at timestamp with time zone
+    id UUID PRIMARY KEY,
+    name VARCHAR(128) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE
 );
 
 -- персоны
 CREATE TABLE IF NOT EXISTS "person"( 
-    id uuid primary key,
-    full_name varchar(128) not null,
-    created_at timestamp with time zone,
-    updated_at timestamp with time zone
+    id UUID PRIMARY KEY,
+    full_name VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE
 );
 
 -- кинопроизведения
 CREATE TABLE IF NOT EXISTS "filmwork"(
-    id uuid primary key,
-    title varchar(128) not null,
-    description text,
+    id UUID PRIMARY KEY,
+    title VARCHAR(128) NOT NULL,
+    description TEXT,
     creation_date date,
-    file_path varchar(128),
-    rating float,
-    type varchar(128) not null,
-    created_at timestamp with time zone,
-    updated_at timestamp with time zone
+    file_path VARCHAR(128),
+    rating FLOAT,
+    type VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE
 );
 
 -- жанры кинопроизведений
 CREATE TABLE IF NOT EXISTS "filmwork_genre"(
-    id uuid primary key,
-    filmwork_id uuid not null,
-    genre_id uuid not null,
-    created_at timestamp with time zone
+    id UUID PRIMARY KEY,
+    filmwork_id UUID NOT NULL,
+    genre_id UUID NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE UNIQUE INDEX filmwork_genre_idx 
     ON "filmwork_genre" (filmwork_id, genre_id);
 
 -- персоны кинопроизведений
 CREATE TABLE IF NOT EXISTS "filmwork_person"(
-    id uuid primary key,
-    filmwork_id uuid not null,
-    person_id uuid not null,
-    role varchar(128) not null,
-    created_at timestamp with time zone
+    id UUID PRIMARY KEY,
+    filmwork_id UUID NOT NULL,
+    person_id UUID NOT NULL,
+    role VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE UNIQUE INDEX filmwork_person_role_idx 
     ON "filmwork_person" (filmwork_id, person_id, role);
