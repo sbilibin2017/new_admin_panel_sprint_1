@@ -37,7 +37,7 @@ class Genre(UUIDMixin, TimeStampedMixin):
         return self.name
 
     class Meta:
-        db_table = 'content\'.\'genre'
+        db_table = "content\".\"genre"
         verbose_name = _('Genre')
         verbose_name_plural = _('Genres')
 
@@ -50,7 +50,7 @@ class Person(UUIDMixin, TimeStampedMixin):
         return self.full_name
 
     class Meta:
-        db_table = 'content\'.\'person'
+        db_table = "content\".\"person"
         verbose_name = _('Person')
         verbose_name_plural = _('Persons')
 
@@ -65,11 +65,11 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     description = models.TextField(
         verbose_name=_('Description'), **DEFAULT_PARAMETERS)
     creation_date = models.DateField(
-        verbose_name=_('Creation date'), **DEFAULT_PARAMETERS)
+        verbose_name=_('Creation date'), blank=True, null=True)
     file_path = models.FileField(
         verbose_name=_('File path'), **DEFAULT_PARAMETERS)
     rating = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(100)],
-                               verbose_name=_('Rating'), **DEFAULT_PARAMETERS)
+                               verbose_name=_('Rating'), blank=True, null=True)
     type = models.CharField(
         max_length=MAX_LENGTH,
         choices=FilmworkType.choices,
@@ -86,7 +86,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         return self.full_name
 
     class Meta:
-        db_table = 'content\'.\'filmwork'
+        db_table = "content\".\"filmwork"
         verbose_name = _('Filmwork')
         verbose_name_plural = _('Filmworks')
 
@@ -100,7 +100,7 @@ class FilmworkGenre(UUIDMixin):
         auto_now_add=True, verbose_name=_('Created at'))
 
     class Meta:
-        db_table = 'content\'.\'filmwork_genre'
+        db_table = "content\".\"filmwork_genre"
         verbose_name = _('FilmworkGenre')
         verbose_name_plural = _('FilmworkGenres')
 
@@ -116,6 +116,6 @@ class FilmworkPerson(UUIDMixin):
 
     class Meta:
         indexes = [UniqueIndex(fields=['filmwork', 'person', 'role'])]
-        db_table = 'content\'.\'filmwork_person'
+        db_table = "content\".\"filmwork_person"
         verbose_name = _('FilmworkPerson')
         verbose_name_plural = _('FilmworkPersons')
