@@ -1,12 +1,10 @@
 """проверка идентичности sqlite3 м postgre БД"""
 
-import logging
 import os
 import sqlite3
 from dataclasses import asdict
 from typing import Dict, Generator
 
-import psycopg2
 from db_settings import POSTGRE_TABLES, SQLITE_TABLES
 from psycopg2.extras import RealDictCursor
 from validators import Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person

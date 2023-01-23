@@ -45,7 +45,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     creation_date: datetime = field(default=None)
     file_path: str = field(default=DEFAULT_VALUE)
     rating: float = field(default=None)
-    type: str = field(default=('Movie'))
+    type: str = field(default=None)
 
 
 @dataclass
