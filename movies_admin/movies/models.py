@@ -58,8 +58,8 @@ class Person(UUIDMixin, TimeStampedMixin):
 class Filmwork(UUIDMixin, TimeStampedMixin):
 
     class FilmworkType(models.TextChoices):
-        MOVIE = 'MV', _('Movie')
-        TV_SHOW = 'TV', _('TV show')
+        MOVIE = 'movie', _('Movie')
+        TV_SHOW = 'TV_show', _('TV show')
 
     title = models.CharField(max_length=MAX_LENGTH, verbose_name=_('Title'))
     description = models.TextField(
@@ -74,7 +74,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         max_length=MAX_LENGTH,
         choices=FilmworkType.choices,
         default=FilmworkType.MOVIE,
-        verbose_name=_('Type')
+        verbose_name=_('Type'),
     )
 
     genres = models.ManyToManyField(
@@ -83,7 +83,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         Person, through='FilmworkPerson', verbose_name=_('Persons'))
 
     def __str__(self):
-        return self.full_name
+        return self.title
 
     class Meta:
         db_table = "content\".\"filmwork"

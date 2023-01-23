@@ -36,9 +36,8 @@ class FilmworkAdmin(admin.ModelAdmin):
     inlines = (GenreFilmworkInline, PersonFilmworkInline,)
     # Отображение полей в списке
     list_display = ('title', 'description', 'type', 'rating', 'creation_date')
-    # фильтры
-    list_filter = ('type', 'creation_date',
-                   ('genres__name', custom_titled_filter(_('Genre'))),
-                   ('persons__full_name', custom_titled_filter(_('Person'))))
+    # # фильтры
+    list_filter = ('type', ('genres__name', custom_titled_filter(_('Genre'))))
+
     # поиск
-    search_fields = ('title', 'description', 'id')
+    search_fields = ('title', 'description', 'id', 'persons__full_name')
