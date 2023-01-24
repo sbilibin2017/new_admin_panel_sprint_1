@@ -8,4 +8,3 @@ repos:
         args: ["--config=setup.cfg"]
         language: python
         types: [python]
-    

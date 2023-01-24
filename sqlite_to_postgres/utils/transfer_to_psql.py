@@ -53,7 +53,7 @@ class PostgresSaver:
         cols = ','.join(row.keys())
         qmarks = ','.join(['%s' for s in row.keys()])
         values = tuple(row.values())
-        insert_statement = f"INSERT INTO content.{table_name} ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;"
+        insert_statement = f'INSERT INTO content.{table_name} ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;'
 
         with self.psql_conn.cursor() as cur:
             try:
