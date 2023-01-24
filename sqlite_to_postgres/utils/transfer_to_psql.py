@@ -1,27 +1,32 @@
-"""проверка идентичности sqlite3 м postgre БД"""
+'''Проверка идентичности sqlite3 м postgre БД.'''
 
+import logging
 import os
 import sqlite3
 from dataclasses import asdict
 from typing import Dict, Generator
 
-from db_settings import POSTGRE_TABLES, SQLITE_TABLES
+import psycopg2
 from psycopg2.extras import RealDictCursor
-from validators import Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person
+
+from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import (
+    POSTGRE_TABLES, SQLITE_TABLES)
+from new_admin_panel_sprint_1.sqlite_to_postgres.utils.validators import (
+    Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person)
 
 
 class SQLiteExtractor:
-    """Класс для извлечения данных из sqlite3 БД."""
+    '''Класс для извлечения данных из sqlite3 БД.'''
 
     def __init__(self, conn: sqlite3.Connection):
         self.sql_conn = conn.cursor()
         self.table_name = SQLITE_TABLES
 
     def extract_movies(self):
-        """Извлекает данные из таблицы"""
+        '''Извлекает данные из таблицы.'''
         for table_name in self.table_name:
             self.sql_conn.execute(
-                f"""SELECT * FROM {table_name}"""
+                f'''SELECT * FROM {table_name}'''
             )
             while True:
                 rows = self.sql_conn.fetchmany(
@@ -33,7 +38,7 @@ class SQLiteExtractor:
 
 
 class PostgresSaver:
-    """Класс для загрузки данных в postre БД."""
+    '''Класс для загрузки данных в postre БД.'''
 
     def __init__(self, psql_conn: RealDictCursor) -> None:
         self.psql_conn = psql_conn
@@ -44,21 +49,21 @@ class PostgresSaver:
             self,
             table_name: str,
             row: Dict) -> None:
-        """Вставляет данные в таблицу"""
+        '''Вставляет данные в таблицу.'''
         cols = ','.join(row.keys())
         qmarks = ','.join(['%s' for s in row.keys()])
         values = tuple(row.values())
         insert_statement = f"INSERT INTO content.{table_name} ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;"
 
         with self.psql_conn.cursor() as cur:
-            # try:
-            cur.execute(insert_statement, values)
-            self.psql_conn.commit()
-            # except psycopg2.Error as e:
-            #     logging.exception(e)
+            try:
+                cur.execute(insert_statement, values)
+                self.psql_conn.commit()
+            except psycopg2.Error as e:
+                logging.exception(e)
 
     def validate_person(self, row):
-        """Валидация персоны"""
+        '''Валидация персоны.'''
         created = Person(
             id=row['id'],
             full_name=row['full_name'],
@@ -69,7 +74,7 @@ class PostgresSaver:
         return created
 
     def validate_genre(self, row):
-        """Валидация жанра"""
+        '''Валидация жанра.'''
         created = Genre(
             id=row['id'],
             name=row['name'] or Genre.name,
@@ -81,7 +86,7 @@ class PostgresSaver:
         return created
 
     def validate_filmwork(self, row):
-        """Валидация кинопроизведения"""
+        '''Валидация кинопроизведения.'''
         created = Filmwork(
             id=row['id'],
             title=row['title'],
@@ -97,7 +102,7 @@ class PostgresSaver:
         return created
 
     def validate_filmwork_genre(self, row):
-        """Валидация жанра кинопроизведения"""
+        '''Валидация жанра кинопроизведения.'''
         created = FilmworkGenre(
             id=row['id'],
             filmwork_id=row['film_work_id'],
@@ -108,7 +113,7 @@ class PostgresSaver:
         return created
 
     def validate_filmwork_person(self, row):
-        """Валидация персоны кинопроизведения"""
+        '''Валидация персоны кинопроизведения.'''
         created = FilmworkPerson(
             id=row['id'],
             filmwork_id=row['film_work_id'],
@@ -120,7 +125,7 @@ class PostgresSaver:
         return created
 
     def save_all_data(self, gen: Generator) -> None:
-        """Валидирует данные и вставляет их в БД"""
+        '''Валидирует данные и вставляет их в БД.'''
         for tup in gen:
             table_name, rows = tup
             table_name = self.d_sqlite2psql_table_name[table_name]
