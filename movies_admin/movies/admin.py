@@ -38,6 +38,5 @@ class FilmworkAdmin(admin.ModelAdmin):
     list_display = ('title', 'description', 'type', 'rating', 'creation_date')
     # # фильтры
     list_filter = ('type', ('genres__name', custom_titled_filter(_('Genre'))))
-
     # поиск
     search_fields = ('title', 'description', 'id', 'persons__full_name')
