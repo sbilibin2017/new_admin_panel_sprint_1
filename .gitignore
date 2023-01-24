@@ -1,2 +1,3 @@
 schema_design/postgresql/
 **/__pycache__
+movies_admin/movies/migrations/

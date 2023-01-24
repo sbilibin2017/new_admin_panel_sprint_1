@@ -8,3 +8,4 @@ repos:
       args: ["--config=setup.cfg"]
       language: python
       types: [python]
+      exclude: ^movies_admin/movies/migrations/
