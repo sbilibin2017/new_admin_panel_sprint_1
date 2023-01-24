@@ -53,14 +53,14 @@ class PostgresSaver:
         cols = ','.join(row.keys())
         qmarks = ','.join(['%s' for s in row.keys()])
         values = tuple(row.values())
-        insert_statement = f'INSERT INTO content.{table_name} ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;'
-
+        insert_statement = f'INSERT INTO content.{table_name} \
+            ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;'
         with self.psql_conn.cursor() as cur:
             try:
                 cur.execute(insert_statement, values)
                 self.psql_conn.commit()
-            except psycopg2.Error as e:
-                logging.exception(e)
+            except psycopg2.Error as error:
+                logging.exception(error)
 
     def validate_person(self, row):
         '''Валидация персоны.'''
