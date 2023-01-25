@@ -1,6 +1,5 @@
 '''Проверка идентичности sqlite3 м postgre БД.'''
 
-import logging
 import os
 import sqlite3
 from dataclasses import asdict
@@ -11,6 +10,7 @@ from psycopg2.extras import RealDictCursor
 
 from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import (
     POSTGRE_TABLES, SQLITE_TABLES)
+from new_admin_panel_sprint_1.sqlite_to_postgres.utils.logger import logger
 from new_admin_panel_sprint_1.sqlite_to_postgres.utils.validators import (
     Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person)
 
@@ -19,16 +19,22 @@ class SQLiteExtractor:
     '''Класс для извлечения данных из sqlite3 БД.'''
 
     def __init__(self, conn: sqlite3.Connection):
+        # подключение к sqlite
         self.sql_conn = conn.cursor()
+        # названия таблиц
         self.table_name = SQLITE_TABLES
 
     def extract_movies(self):
         '''Извлекает данные из таблицы.'''
+        # для каждой таблицы
         for table_name in self.table_name:
+            # выбираем данные
             self.sql_conn.execute(
                 f'''SELECT * FROM {table_name}'''
             )
+            # пока в результате запроса есть данные
             while True:
+                # отдаем данные чанками по 1000 записей
                 rows = self.sql_conn.fetchmany(
                     int(os.environ.get('CHUNK_SIZE')))
                 if rows:
@@ -41,18 +47,30 @@ class PostgresSaver:
     '''Класс для загрузки данных в postre БД.'''
 
     def __init__(self, psql_conn: RealDictCursor) -> None:
+        # подключение к postgre
         self.psql_conn = psql_conn
+        # маппинг названий между sqlite и postgre
         self.d_sqlite2psql_table_name = dict(
             zip(SQLITE_TABLES, POSTGRE_TABLES))
+        # датаклассы для валидации
+        self.dataclasses = dict(
+            zip(POSTGRE_TABLES, (Person, Genre, Filmwork, FilmworkGenre, FilmworkPerson)))
+        # счетчик записей в таблицах
+        self.row_counters = dict(
+            zip(POSTGRE_TABLES, [0] * len(POSTGRE_TABLES)))
 
     def insert_query(
             self,
             table_name: str,
             row: Dict) -> None:
         '''Вставляет данные в таблицу.'''
+        # список ключей
         cols = ','.join(row.keys())
+        # метки для запроса
         qmarks = ','.join(['%s' for s in row.keys()])
+        # значения
         values = tuple(row.values())
+        # запрос для вставки данных в БД
         insert_statement = f'INSERT INTO content.{table_name} \
             ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;'
         with self.psql_conn.cursor() as cur:
@@ -60,89 +78,38 @@ class PostgresSaver:
                 cur.execute(insert_statement, values)
                 self.psql_conn.commit()
             except psycopg2.Error as error:
-                logging.exception(error)
+                logger.exception(error)
 
-    def validate_person(self, row):
-        '''Валидация персоны.'''
-        created = Person(
-            id=row['id'],
-            full_name=row['full_name'],
-            created_at=row['created_at'] or Person.created_at,
-            updated_at=row['updated_at'] or Person.updated_at
-        )
+    def validate(self, model, data):
+        '''Валидирует данные.'''
+        return asdict(model(**data))
 
-        return created
-
-    def validate_genre(self, row):
-        '''Валидация жанра.'''
-        created = Genre(
-            id=row['id'],
-            name=row['name'] or Genre.name,
-            description=row['description'] or Genre.description,
-            created_at=row['created_at'] or Genre.created_at,
-            updated_at=row['updated_at'] or Genre.updated_at
-        )
-
-        return created
-
-    def validate_filmwork(self, row):
-        '''Валидация кинопроизведения.'''
-        created = Filmwork(
-            id=row['id'],
-            title=row['title'],
-            description=row['description'],
-            creation_date=row['creation_date'],
-            file_path=row['file_path'] or Filmwork.file_path,
-            rating=row['rating'] or Filmwork.rating,
-            type=row['type'] or Filmwork.type,
-            created_at=row['created_at'] or Filmwork.created_at,
-            updated_at=row['updated_at'] or Filmwork.updated_at
-        )
-
-        return created
-
-    def validate_filmwork_genre(self, row):
-        '''Валидация жанра кинопроизведения.'''
-        created = FilmworkGenre(
-            id=row['id'],
-            filmwork_id=row['film_work_id'],
-            genre_id=row['genre_id'],
-            created_at=row['created_at'] or FilmworkGenre.created_at
-        )
-
-        return created
-
-    def validate_filmwork_person(self, row):
-        '''Валидация персоны кинопроизведения.'''
-        created = FilmworkPerson(
-            id=row['id'],
-            filmwork_id=row['film_work_id'],
-            person_id=row['person_id'],
-            role=row['role'] or FilmworkPerson.role,
-            created_at=row['created_at'] or FilmworkPerson.created_at
-        )
-
-        return created
+    def fix_filmwork_id(self, table_name: str, row: dict) -> dict:
+        '''Заменяет ключ film_work_id на filmwork_id.'''
+        if table_name in ('filmwork_genre', 'filmwork_person'):
+            row['filmwork_id'] = row['film_work_id']
+            del row['film_work_id']
+        return row
 
     def save_all_data(self, gen: Generator) -> None:
         '''Валидирует данные и вставляет их в БД.'''
         for tup in gen:
+            # таблица, данные
             table_name, rows = tup
             table_name = self.d_sqlite2psql_table_name[table_name]
-            print(table_name)
+            logger.info(f'Таблица: {table_name}')
+            # для каждой строки в данных
             for row in rows:
-                if table_name == 'person':
-                    created = self.validate_person(row)
-                elif table_name == 'genre':
-                    created = self.validate_genre(row)
-                elif table_name == 'filmwork':
-                    created = self.validate_filmwork(row)
-                elif table_name == 'filmwork_person':
-                    created = self.validate_filmwork_person(row)
-                elif table_name == 'filmwork_genre':
-                    created = self.validate_filmwork_genre(row)
-                row_validated = asdict(created)
+                # переименовывем ключи
+                row = self.fix_filmwork_id(table_name, row)
+                # валидируем данные
+                row_validated = self.validate(
+                    self.dataclasses[table_name], row)
+                # вставляем данные в постргрес БД
                 self.insert_query(
                     table_name=table_name,
                     row=row_validated
                 )
+                # увеличиваем счетчик строк
+                self.row_counters[table_name] += 1
+            logger.info(f'Число строк в таблицах: {self.row_counters}')
