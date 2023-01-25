@@ -13,6 +13,7 @@ MAX_LENGTH = 255
 
 class TimeStampedMixin(models.Model):
     '''Миксин для даты.'''
+
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name=_('Created at'))
     updated_at = models.DateTimeField(
@@ -24,6 +25,7 @@ class TimeStampedMixin(models.Model):
 
 class UUIDMixin(models.Model):
     '''Миксин для id.'''
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     class Meta:
@@ -32,6 +34,7 @@ class UUIDMixin(models.Model):
 
 class Genre(UUIDMixin, TimeStampedMixin):
     '''Класс для описания жанра.'''
+
     name = models.CharField(max_length=MAX_LENGTH, verbose_name=_('Name'))
     description = models.TextField(
         verbose_name=_('Description'), **DEFAULT_PARAMETERS)
@@ -47,6 +50,7 @@ class Genre(UUIDMixin, TimeStampedMixin):
 
 class Person(UUIDMixin, TimeStampedMixin):
     '''Класс для описания персоны.'''
+
     full_name = models.CharField(
         max_length=MAX_LENGTH, verbose_name=_('Full name'))
 
@@ -64,6 +68,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
 
     class FilmworkType(models.TextChoices):
         '''Класс для описания типа кинопроизведения.'''
+
         MOVIE = 'movie', _('Movie')
         TV_SHOW = 'TV_show', _('TV show')
 
@@ -99,6 +104,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
 
 class FilmworkGenre(UUIDMixin):
     '''Класс для описания жанров кинопроизведения.'''
+
     filmwork = models.ForeignKey(to='Filmwork', db_column='filmwork_id',
                                  on_delete=models.CASCADE, verbose_name=_('Filmwork'))
     genre = models.ForeignKey(to='Genre', db_column='genre_id',
@@ -114,6 +120,7 @@ class FilmworkGenre(UUIDMixin):
 
 class FilmworkPerson(UUIDMixin):
     '''Класс для описания персон кинопроизведения.'''
+
     filmwork = models.ForeignKey(to='Filmwork', db_column='filmwork_id',
                                  on_delete=models.CASCADE, verbose_name=_('Filmwork'))
     person = models.ForeignKey(to='Person', db_column='person_id',
