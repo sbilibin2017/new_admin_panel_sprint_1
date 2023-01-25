@@ -29,3 +29,4 @@ if __name__ == '__main__':
             closing(psycopg2.connect(**DSL, cursor_factory=RealDictCursor)) as pg_conn:
         sqlite_cur = sqlite_conn.cursor()
         load_from_sqlite(sqlite_conn, pg_conn)
+    logger.info('Закрываем соединения с sqlite и postgre ...')

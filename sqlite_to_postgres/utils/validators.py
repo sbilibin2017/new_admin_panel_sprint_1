@@ -14,17 +14,11 @@ class TimeStampedMixin():
     created_at: datetime = field(default=NOW)
     updated_at: datetime = field(default=NOW)
 
-    class Meta:
-        abstract = True
-
 
 @dataclass
 class UUIDMixin():
     '''Класс для хэш-идентификатора/'''
     id: uuid.UUID = field(default_factory=NEW_UUID)
-
-    class Meta:
-        abstract = True
 
 
 @dataclass

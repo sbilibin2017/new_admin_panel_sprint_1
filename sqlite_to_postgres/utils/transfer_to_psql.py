@@ -3,7 +3,7 @@
 import os
 import sqlite3
 from dataclasses import asdict
-from typing import Dict, Generator
+from typing import Generator
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -58,20 +58,22 @@ class PostgresSaver:
     def insert_query(
             self,
             table_name: str,
-            row: Dict) -> None:
+            row: list) -> None:
         '''Вставляет данные в таблицу.'''
         # список ключей
-        cols = ','.join(row.keys())
+        cols = ','.join(row[0].keys())
         # метки для запроса
-        qmarks = ','.join(['%s' for s in row.keys()])
+        qmarks = ','.join(['%s' for s in row[0].keys()])
         # значения
-        values = tuple(row.values())
+        values = tuple([tuple(r.values()) for r in row])
+
         # запрос для вставки данных в БД
         insert_statement = f'INSERT INTO content.{table_name} \
             ({cols}) VALUES ({qmarks}) ON CONFLICT DO NOTHING;'
+
         with self.psql_conn.cursor() as cur:
             try:
-                cur.execute(insert_statement, values)
+                cur.executemany(insert_statement, values)
                 self.psql_conn.commit()
             except psycopg2.Error as error:
                 logger.exception(error)
@@ -86,16 +88,17 @@ class PostgresSaver:
             # таблица, данные
             table_name, rows = tup
             logger.info(f'Таблица: {table_name}')
-            # для каждой строки в данных
-            for row in rows:
-                # валидируем данные
-                row_validated = self.validate(
-                    self.dataclasses[table_name], row)
-                # вставляем данные в постргрес БД
-                self.insert_query(
-                    table_name=table_name,
-                    row=row_validated
-                )
-                # увеличиваем счетчик строк
-                self.row_counters[table_name] += 1
+            # # для каждой строки в данных
+            # for row in rows:
+            # валидируем данные
+            rows_validated = [self.validate(
+                self.dataclasses[table_name], row) for row in rows]
+
+            # вставляем данные в постргрес БД
+            self.insert_query(
+                table_name=table_name,
+                row=rows_validated
+            )
+            # увеличиваем счетчик строк
+            self.row_counters[table_name] += len(rows_validated)
             logger.info(f'Число строк в таблицах: {self.row_counters}')
