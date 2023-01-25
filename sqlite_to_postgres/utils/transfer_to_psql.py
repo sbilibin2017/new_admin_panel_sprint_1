@@ -8,8 +8,7 @@ from typing import Dict, Generator
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import (
-    POSTGRE_TABLES, SQLITE_TABLES)
+from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import TABLES
 from new_admin_panel_sprint_1.sqlite_to_postgres.utils.logger import logger
 from new_admin_panel_sprint_1.sqlite_to_postgres.utils.validators import (
     Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person)
@@ -22,7 +21,7 @@ class SQLiteExtractor:
         # подключение к sqlite
         self.sql_conn = conn.cursor()
         # названия таблиц
-        self.table_name = SQLITE_TABLES
+        self.table_name = TABLES
 
     def extract_movies(self):
         '''Извлекает данные из таблицы.'''
@@ -49,15 +48,12 @@ class PostgresSaver:
     def __init__(self, psql_conn: RealDictCursor) -> None:
         # подключение к postgre
         self.psql_conn = psql_conn
-        # маппинг названий между sqlite и postgre
-        self.d_sqlite2psql_table_name = dict(
-            zip(SQLITE_TABLES, POSTGRE_TABLES))
         # датаклассы для валидации
         self.dataclasses = dict(
-            zip(POSTGRE_TABLES, (Person, Genre, Filmwork, FilmworkGenre, FilmworkPerson)))
+            zip(TABLES, (Person, Genre, Filmwork, FilmworkGenre, FilmworkPerson)))
         # счетчик записей в таблицах
         self.row_counters = dict(
-            zip(POSTGRE_TABLES, [0] * len(POSTGRE_TABLES)))
+            zip(TABLES, [0] * len(TABLES)))
 
     def insert_query(
             self,
@@ -84,24 +80,14 @@ class PostgresSaver:
         '''Валидирует данные.'''
         return asdict(model(**data))
 
-    def fix_filmwork_id(self, table_name: str, row: dict) -> dict:
-        '''Заменяет ключ film_work_id на filmwork_id.'''
-        if table_name in ('filmwork_genre', 'filmwork_person'):
-            row['filmwork_id'] = row['film_work_id']
-            del row['film_work_id']
-        return row
-
     def save_all_data(self, gen: Generator) -> None:
         '''Валидирует данные и вставляет их в БД.'''
         for tup in gen:
             # таблица, данные
             table_name, rows = tup
-            table_name = self.d_sqlite2psql_table_name[table_name]
             logger.info(f'Таблица: {table_name}')
             # для каждой строки в данных
             for row in rows:
-                # переименовывем ключи
-                row = self.fix_filmwork_id(table_name, row)
                 # валидируем данные
                 row_validated = self.validate(
                     self.dataclasses[table_name], row)

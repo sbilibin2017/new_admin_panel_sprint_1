@@ -15,9 +15,6 @@ DSL = {
     'host': os.getenv('POSTGRES_HOST', '127.0.0.1'),
     'port': os.getenv('POSTGRES_PORT', '5432'),
 }
-# таблицы в postgre
-POSTGRE_TABLES = ('person', 'genre', 'filmwork',
-                  'filmwork_genre', 'filmwork_person')
-# таблицы в sqlite
-SQLITE_TABLES = ('person', 'genre', 'film_work',
-                 'genre_film_work', 'person_film_work')
+# таблицы
+TABLES = ('person', 'genre', 'filmwork',
+          'filmwork_genre', 'filmwork_person')
