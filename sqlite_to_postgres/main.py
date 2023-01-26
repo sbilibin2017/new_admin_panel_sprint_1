@@ -9,10 +9,10 @@ from dotenv import load_dotenv
 from psycopg2.extras import RealDictCursor
 
 from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import DSL
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.load_from_sqlite import \
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.load_from_sqlite import \
     load_from_sqlite
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.logger import logger
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.sqlite_context_manager import \
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.logger import logger
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.sqlite_context_manager import \
     conn_context
 
 # корень проекта

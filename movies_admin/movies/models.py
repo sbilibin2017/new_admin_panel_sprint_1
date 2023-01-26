@@ -75,12 +75,13 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     title = models.CharField(max_length=MAX_LENGTH, verbose_name=_('Title'))
     description = models.TextField(
         verbose_name=_('Description'), **DEFAULT_PARAMETERS)
-    creation_date = models.DateField(
-        verbose_name=_('Creation date'), blank=True, null=True)
+    creation_date = models.DateField(verbose_name=_(
+        'Creation date'), blank=True, null=True)
     file_path = models.FileField(
         verbose_name=_('File path'), **DEFAULT_PARAMETERS)
-    rating = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(100)],
-                               verbose_name=_('Rating'), blank=True, null=True)
+    rating = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name=_('Rating'), blank=True, null=True
+    )
     type = models.CharField(
         max_length=MAX_LENGTH,
         choices=FilmworkType.choices,
@@ -105,12 +106,16 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
 class FilmworkGenre(UUIDMixin):
     '''Класс для описания жанров кинопроизведения.'''
 
-    filmwork = models.ForeignKey(to='Filmwork', db_column='filmwork_id',
-                                 on_delete=models.CASCADE, verbose_name=_('Filmwork'))
+    filmwork = models.ForeignKey(
+        to='Filmwork', db_column='filmwork_id', on_delete=models.CASCADE, verbose_name=_('Filmwork')
+    )
     genre = models.ForeignKey(to='Genre', db_column='genre_id',
                               on_delete=models.CASCADE, verbose_name=_('Genre'))
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name=_('Created at'))
+
+    def __str__(self):
+        return 'Жанры кинопроизведения'
 
     class Meta:
         db_table = "content\".\"filmwork_genre"
@@ -121,13 +126,17 @@ class FilmworkGenre(UUIDMixin):
 class FilmworkPerson(UUIDMixin):
     '''Класс для описания персон кинопроизведения.'''
 
-    filmwork = models.ForeignKey(to='Filmwork', db_column='filmwork_id',
-                                 on_delete=models.CASCADE, verbose_name=_('Filmwork'))
+    filmwork = models.ForeignKey(
+        to='Filmwork', db_column='filmwork_id', on_delete=models.CASCADE, verbose_name=_('Filmwork')
+    )
     person = models.ForeignKey(to='Person', db_column='person_id',
                                on_delete=models.CASCADE, verbose_name=_('Person'))
     role = models.TextField(verbose_name=_('Role'), **DEFAULT_PARAMETERS)
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name=_('Created at'))
+
+    def __str__(self):
+        return 'Персоны кинопроизведения'
 
     class Meta:
         indexes = [UniqueIndex(fields=['filmwork', 'person', 'role'])]
