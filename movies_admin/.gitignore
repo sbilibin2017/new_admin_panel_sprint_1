@@ -2,4 +2,5 @@ venv/
 .env
 **/__pycache__
 *.pyc 
-migrations/
+movies/migrations/
+movies/migrations/__pycache__/

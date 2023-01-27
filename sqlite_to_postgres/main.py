@@ -5,10 +5,10 @@ from contextlib import closing
 from pathlib import Path
 
 import psycopg2
+from db.settings import DSL
 from dotenv import load_dotenv
 from psycopg2.extras import RealDictCursor
 
-from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import DSL
 from new_admin_panel_sprint_1.sqlite_to_postgres.src.load_from_sqlite import \
     load_from_sqlite
 from new_admin_panel_sprint_1.sqlite_to_postgres.src.logger import logger
@@ -17,6 +17,7 @@ from new_admin_panel_sprint_1.sqlite_to_postgres.src.sqlite_context_manager impo
 
 # корень проекта
 BASE_DIR = Path(__file__).resolve().parent
+print(BASE_DIR)
 # загрузка переенных окружения
 load_dotenv(BASE_DIR / '.env')
 # путь до sqlite БД

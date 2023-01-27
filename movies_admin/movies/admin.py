@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from models import Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person
+
+from .models import Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person
 
 
 def custom_titled_filter(title):
@@ -9,20 +10,22 @@ def custom_titled_filter(title):
             instance = admin.FieldListFilter.create(*args, **kwargs)
             instance.title = title
             return instance
-
     return Wrapper
 
 
+# Жанр
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'updated_at')
 
 
+# Персона
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'updated_at')
 
 
+# Кинопроизведение
 class GenreFilmworkInline(admin.TabularInline):
     model = FilmworkGenre
 
@@ -33,6 +36,7 @@ class PersonFilmworkInline(admin.TabularInline):
 
 @admin.register(Filmwork)
 class FilmworkAdmin(admin.ModelAdmin):
+    # отображение жанров и персона в кинопроизведении
     inlines = (
         GenreFilmworkInline,
         PersonFilmworkInline,

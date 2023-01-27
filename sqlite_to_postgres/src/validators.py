@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.constants import (
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.constants import (
     EMPTY_STRING, NEW_UUID, NOW, TYPE_DEFAULT)
 
 

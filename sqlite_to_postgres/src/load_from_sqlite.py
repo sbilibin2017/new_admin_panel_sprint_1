@@ -2,7 +2,7 @@ import sqlite3
 
 from psycopg2.extensions import connection as _connection
 
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.transfer_to_psql import (
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.transfer_to_psql import (
     PostgresSaver, SQLiteExtractor)
 
 

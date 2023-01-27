@@ -9,8 +9,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 from new_admin_panel_sprint_1.sqlite_to_postgres.db.settings import TABLES
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.logger import logger
-from new_admin_panel_sprint_1.sqlite_to_postgres.utils.validators import (
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.logger import logger
+from new_admin_panel_sprint_1.sqlite_to_postgres.src.validators import (
     Filmwork, FilmworkGenre, FilmworkPerson, Genre, Person)
 
 
